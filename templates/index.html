@@ -13,13 +13,13 @@
         <title>Chatter Box</title>
     </head>
     <body>
-        <div  class="jumbotron">
+        <div  class="jumbotron" style="background-color:lavender;">
         <h2>Welcome to Chatter Box</h2>
         </div>
 
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-6" style="background-color:lavender;">
+                <div class="col-md-2" style="background-color:#d9d9d9;">
 
                     <h3>Set Display Name</h3>
                     <h5 id="myUsername"></h5>
@@ -41,15 +41,22 @@
                     <h5 id="myChannelist"></h5>
                         <select id="mySelect" onchange="loadPage()">
                         </select>
+                    <br>
 
-                    <p id="demo"></p>
-                    <h3 id="body"></h3>
+                    <button type="button" id="myUsers" onclick="loadUsers()">Direct Messages</button>
+                    <select id="myUser"  >
+                        </select>
+
+                    <br>
+
+                     </div>
+
+                <div class="col-md-5" style="background-color:#e6f2ff">
+                    <h5>Your Messages:</h5>
                     <div id="messages"></div>
-                    <ul id="votes"></ul>
                     </div>
 
-
-                <div class="col-sm-6" style="background-color:lavenderblush;">
+                <div class="col-md-5" style="background-color:lavenderblush;">
                     <div class="center">
                     <h3>Messages</h3>
                     <h5 id="myMessage"></h5>

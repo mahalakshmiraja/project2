@@ -26,6 +26,30 @@ function loadPage() {
     };
     request.send(JSON.stringify({ channelName: channel }));
 }
+
+//*************************loadUsers()
+function loadUsers() {
+    document.getElementById("myUsers").disabled=true;
+    document.getElementById("mySelect").disabled=true;
+    const request = new XMLHttpRequest();
+    request.open('POST', "/loadUsers");
+    request.setRequestHeader("Content-Type", "application/json");
+        request.onload = () => {
+            let userNames = request.responseText;
+            let listOfusers = JSON.parse(userNames);
+            listOfusers.forEach((usr) => {
+                userSelect = document.querySelector('#myUser');
+                option = document.createElement("option");
+                option.text = usr;
+                option.value = usr;
+                userSelect.appendChild(option);
+            });
+        };
+        request.send(JSON.stringify({ username: username }));
+}
+
+
+//************************************
 let socketReady = false;
 
 //********************Setting Socket IO **********************
@@ -35,6 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         socketReady = true;
         let messagesElement = document.querySelector('#messages');
         document.querySelector('#messages').value = "";
+
         socket.on('announce message', messagesString => {
             let messages = JSON.parse(messagesString);
             let messageJson = JSON.parse(messages);
@@ -46,8 +71,22 @@ document.addEventListener('DOMContentLoaded', () => {
             p.innerHTML = displayMessage;
             messagesElement.appendChild(p);
         });
+
+        socket.on('announce directMessage', messagesString => {
+            let messages = JSON.parse(messagesString);
+            let messageJson = JSON.parse(messages);
+            let p = document.createElement("p");
+            name = messageJson.user;
+            txt = messageJson.text;
+            tme = messageJson.time;
+            displayMessage = name + ":" + " " + txt + " " + tme;
+            p.innerHTML = displayMessage;
+            messagesElement.appendChild(p);
+        });
+
     });
 
+    //Condition to display username in local storage even after refreshing
     let lastUser = localStorage.getItem('username');
     if (lastUser) {
         document.querySelector('#myUsername').innerHTML = 'Your display name is currently ' + lastUser;
@@ -74,33 +113,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
             }
         });
-        if (lastSavedChannel && channelSelect.value == lastSavedChannel) {
-            const request = new XMLHttpRequest();
-            request.open('POST', "/load");
-            request.setRequestHeader("Content-Type", "application/json");
-            request.onload = () => {
-                let messagesElement = document.querySelector('#messages');
-                const response = request.responseText;
-                const messages = JSON.parse(response);
-                messages.forEach((message) => {
-                    let messageJson = JSON.parse(message);
-                    let p = document.createElement("p");
-                    name = messageJson.user;
-                    txt = messageJson.text;
-                    displayMessage = name + ":" + " " + txt;
-                    p.innerHTML = displayMessage;
-                    messagesElement.appendChild(p)
-                });
+    //Condition to store channel in localStorage and display all contents of channel even after refreshing the page:
+    if (lastSavedChannel && channelSelect.value == lastSavedChannel) {
+        const request = new XMLHttpRequest();
+        request.open('POST', "/load");
+        request.setRequestHeader("Content-Type", "application/json");
+        request.onload = () => {
+            let messagesElement = document.querySelector('#messages');
+            const response = request.responseText;
+            const messages = JSON.parse(response);
 
-            };
-            request.send(JSON.stringify({ channelName: lastSavedChannel }));
-        }
+            messages.forEach((message) => {
+                let messageJson = JSON.parse(message);
+                let p = document.createElement("p");
+                name = messageJson.user;
+                txt = messageJson.text;
+                displayMessage = name + ":" + " " + txt;
+                p.innerHTML = displayMessage;
+                messagesElement.appendChild(p)
+            });
+
+        };
+        request.send(JSON.stringify({ channelName: lastSavedChannel }));
+    }
     };
     channelRequest.send();
 
 
-    //********************Setting Socket IO **********************
-    // By default, submit button is disabled
+
+    // By default, submit buttons are disabled
     document.querySelector('#submit1').disabled = true;
     document.querySelector('#submit2').disabled = true;
 
@@ -138,7 +179,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('channel', channel);
                 }
 
-
                 //Checking channelList from the server
                 const request = new XMLHttpRequest();
                 request.open('GET', "/channel");
@@ -148,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (listOfchannels.includes(channel)) {
                         document.querySelector('#errorMsg').innerHTML = "This Channel Name Already Exists !"
                         document.querySelector('#channel').value = ""
-
 
                     }
                     else {
@@ -181,37 +220,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //********************Getting Messages **********************
     document.querySelector('#submit3').onclick = () => {
-        //chSelected = document.querySelector('#mySelect').value.onclick()
-        //if  (username.length > 0){
-        //channel = document.querySelector('#mySelect').option.onclick();
-        //message = username + "," + "12.30" + "," + document.querySelector('#message').value;
+
         text = document.querySelector('#message').value;
-        // Get UTC and add that to server
-        var time = new Date(Date.UTC(2018, 06, 24))
-        //time = time.toUTCString();
-        //var dt = new Date();
-        //console.log(dt); // Gives Tue Mar 22 2016 09:30:00 GMT+0530 (IST)
-
-        //dt.setTime(dt.getTime()+dt.getTimezoneOffset()*60*1000);
-        //console.log(dt); // Gives Tue Mar 22 2016 04:00:00 GMT+0530 (IST)
-
-        //var offset = -300; //Timezone offset for EST in minutes.
-        //var time = new Date(dt.getTime() + offset*60*1000);
-        //console.log(time); //Gives Mon Mar 21 2016 23:00:00 GMT+0530 (IST)
-
-        //var estTime = new Date(Date.UTC(year, month, day, hour, minute, second)); // get local time to be calculated into EST
-        //var time = estTime.setHours(estTime.getHours() + estTime.getTimezoneOffset()/60 - 5); // getTimezoneOffset returns in minutes hence /6
+        var date = new Date();
+        var hrs = date.getHours();
+        var min = date.getMinutes();
+        let time=hrs+":"+min
 
         let message = {
             username,
             time,
             text
         }
-        //document.querySelector('#body3').innerHTML = message.text;
-        //document.querySelector('#message').value = '';
-        // When connected, configure buttons
-        if (socketReady) {
+
+        sendToUser = document.getElementById("myUser").value;
+        noChannel = document.querySelector('#channel').value.length;
+        noChannelist = document.getElementById("mySelect").disabled;
+
+
+        if ((noChannel === 0) && (noChannelist) && (socketReady)) {
+            socket.emit('directMessage', { 'userName': sendToUser, 'message': message });
+        }
+        else{
             socket.emit('submit message', { 'channelName': channel, 'message': message });
         }
+        document.querySelector('#message').value="";
+
     }
 });
+
+

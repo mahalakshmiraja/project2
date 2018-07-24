@@ -18,7 +18,9 @@ class Message:
 
 
 # list of all channels
-channelList = ['general','direct']
+channelList = ['general']
+
+
 
 #list of messages
 channelMessages = {}
@@ -26,7 +28,12 @@ for channel in channelList:
     channelMessages[channel] = [Message("Server", str(datetime.now()), "Welcome to Channel:" + channel)]
 
 #list of Users:
-users = ['maha']
+users = ['lily', 'Rose']
+
+userMessages = {}
+for user in users:
+    userMessages[user] = [Message("Server", str(datetime.now()), "Welcome")]
+
 
 @app.route("/")
 def index():
@@ -34,7 +41,7 @@ def index():
 
 
 @app.route("/channel", methods=["POST", "GET"])
-def first():
+def chInquiry():
     if request.method == 'GET':
         print ("GET Channel-> Getting channel list from server")
         return json.dumps(channelList)
@@ -65,9 +72,22 @@ def loadChannel():
         print(messageResponse)
     return json.dumps(messageResponse)
 
+@app.route("/loadUsers", methods=["POST"])
+def loadUsers():
+    print ("Hi from LOAD Users Page")
+    jsonData = request.get_json();
+    print (jsonData)
+    username = jsonData['username']
+    if username not in users:
+        users.append(username)
+        return json.dumps(users)
+    else:
+        return json.dumps(users)
+
+
 
 @socketio.on("submit message")
-def vote(data):
+def channelServer(data):
     print ("Hi from socketio")
     print (data)
     chname = data["channelName"]
@@ -78,5 +98,29 @@ def vote(data):
     if chname in channelList:
         messageObj = Message(message["username"], message["time"], message["text"])
         channelMessages[chname].append(messageObj)
+        dicLen = channelMessages[chname]
+        count = 0
+        while(len(dicLen)>100):
+            del channelMessages[chname][count]
         messageResponse.append(json.dumps(messageObj.__dict__))
     emit("announce message", json.dumps(messageResponse) , broadcast=True)
+
+
+@socketio.on("directMessage")
+def userServer(directData):
+    print ("Hi from USER socketio")
+    print (directData)
+    usrname = directData["userName"]
+    print(usrname)
+    message = directData["message"]
+    print(message)
+    messageResponse = []
+    if usrname in users:
+        messageObj = Message(message["username"], message["time"], message["text"])
+        userMessages[usrname].append(messageObj)
+        dicLen = userMessages[usrname]
+        count = 0
+        while(len(dicLen)>100):
+            del userMessages[usrname][count]
+        messageResponse.append(json.dumps(messageObj.__dict__))
+    emit("announce directMessage", json.dumps(messageResponse) , broadcast=True)
