@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+        <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+        <script type="text/javascript" src="../static/index.js"></script>
+
+
+        <title>Chatter Box</title>
+    </head>
+    <body>
+        <div  class="jumbotron">
+        <h2>Welcome to Chatter Box</h2>
+        </div>
+
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-6" style="background-color:lavender;">
+
+                    <h3>Set Display Name</h3>
+                    <h5 id="myUsername"></h5>
+                    <form id="form">
+                        <input id="user" name="username" autocomplete="off" autofocus placeholder="Enter display name" type="text">
+                        <input id="submit1" type="submit">
+                    </form>
+
+                    <br>
+                    <h3>Create Channel List</h3>
+                    <h5 id="myChannel"></h5>
+                    <form id="channelForm">
+                        <input id="channel" name="channelname" autocomplete="off" autofocus placeholder="Create channel name" type="text">
+                        <input id="submit2" type="submit">
+                    </form>
+                    <h5 id=errorMsg></h5>
+                    <br>
+                    <h3>Select Channel List</h3>
+                    <h5 id="myChannelist"></h5>
+                        <select id="mySelect" onchange="loadPage()">
+                        </select>
+
+                    <p id="demo"></p>
+                    <h3 id="body"></h3>
+                    <div id="messages"></div>
+                    <ul id="votes"></ul>
+                    </div>
+
+
+                <div class="col-sm-6" style="background-color:lavenderblush;">
+                    <div class="center">
+                    <h3>Messages</h3>
+                    <h5 id="myMessage"></h5>
+                    <form id="MessageForm">
+                        <input id="message" name="message" autocomplete="off" autofocus placeholder="Type your messsage" type="text">
+                        <button id="submit3" type="button">Send </button>
+                    </form>
+                    <p id="body3"></p>
+                    </div>
+
+                    <p id="body4"></p>
+                    </div>
+            </div>
+        </div>
+    </body>
+</html>
+
+
